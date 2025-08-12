@@ -191,7 +191,7 @@ Then open `http://localhost:8080/example.html` in your browser.
 
 ## License
 
-MIT License
+Apache 2.0
 
 ## Contributing
 
