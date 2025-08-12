@@ -1,0 +1,42 @@
+/* Mapbox Scalebar Plugin Styles */
+
+.mapbox-scalebar-ctrl {
+    margin: 0;
+    padding: 0;
+}
+
+.mapbox-scalebar-ctrl canvas {
+    display: block;
+    border-radius: 3px;
+}
+
+/* Position variants */
+.mapboxgl-ctrl-bottom-left .mapbox-scalebar-ctrl {
+    margin: 0 0 10px 10px;
+}
+
+.mapboxgl-ctrl-bottom-right .mapbox-scalebar-ctrl {
+    margin: 0 10px 10px 0;
+}
+
+.mapboxgl-ctrl-top-left .mapbox-scalebar-ctrl {
+    margin: 10px 0 0 10px;
+}
+
+.mapboxgl-ctrl-top-right .mapbox-scalebar-ctrl {
+    margin: 10px 10px 0 0;
+}
+
+/* Custom themes */
+.mapbox-scalebar-ctrl.theme-dark canvas {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.mapbox-scalebar-ctrl.theme-light canvas {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.mapbox-scalebar-ctrl.theme-minimal canvas {
+    border-radius: 0;
+    box-shadow: none;
+}

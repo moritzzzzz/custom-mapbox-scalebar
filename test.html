@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Scalebar Plugin Test</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+        #log { 
+            position: absolute; 
+            top: 10px; 
+            left: 10px; 
+            background: white; 
+            padding: 10px; 
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-width: 300px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="log">
+        <strong>Scalebar Test Log:</strong><br>
+        <div id="log-content">Loading...</div>
+    </div>
+
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
+    <script src="src/mapbox-scalebar.js"></script>
+    <script>
+        const log = document.getElementById('log-content');
+        
+        function addLog(message) {
+            log.innerHTML += '<br>' + message;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Test without actual Mapbox token (will show error but plugin should still load)
+        mapboxgl.accessToken = 'pk.test.token';
+        
+        addLog('✓ Mapbox GL loaded');
+        addLog('✓ MapboxScalebar class available: ' + (typeof MapboxScalebar !== 'undefined'));
+        
+        // Test scalebar creation
+        try {
+            const scalebar = new MapboxScalebar({
+                units: 'metric',
+                maxWidth: 150
+            });
+            addLog('✓ Scalebar instance created');
+            
+            // Test methods
+            const options = scalebar.getOptions();
+            addLog('✓ getOptions() works: ' + Object.keys(options).length + ' options');
+            
+            scalebar.setOptions({ units: 'imperial' });
+            addLog('✓ setOptions() works');
+            
+            const updatedOptions = scalebar.getOptions();
+            addLog('✓ Options updated: units = ' + updatedOptions.units);
+            
+        } catch (error) {
+            addLog('✗ Error creating scalebar: ' + error.message);
+        }
+
+        // Create map (will fail due to token but that's ok for testing)
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v12',
+            center: [-74.5, 40],
+            zoom: 9
+        });
+
+        map.on('error', function(e) {
+            addLog('ℹ Map error expected (invalid token): ' + (e.error ? e.error.message.substring(0, 50) + '...' : 'Unknown'));
+        });
+
+        // Test adding control
+        try {
+            const testScalebar = new MapboxScalebar({
+                units: 'both',
+                textColor: '#ff0000'
+            });
+            
+            map.addControl(testScalebar, 'bottom-left');
+            addLog('✓ Scalebar added to map control');
+            
+            setTimeout(() => {
+                addLog('✓ Plugin integration test completed');
+                addLog('ℹ Note: Map tiles won\'t load without valid Mapbox token');
+                addLog('ℹ Replace token in example.html to test with real map');
+            }, 1000);
+            
+        } catch (error) {
+            addLog('✗ Error adding scalebar to map: ' + error.message);
+        }
+    </script>
+</body>
+</html>

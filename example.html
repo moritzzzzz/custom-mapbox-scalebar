@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapbox Scalebar Plugin Example</title>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+        
+        .controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 300px;
+            z-index: 1000;
+        }
+        
+        .control-group {
+            margin-bottom: 10px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .control-group input,
+        .control-group select {
+            width: 100%;
+            padding: 4px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        .color-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .color-controls .control-group {
+            flex: 1;
+        }
+        
+        button {
+            background: #007cbf;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 2px;
+            font-size: 11px;
+        }
+        
+        button:hover {
+            background: #005a87;
+        }
+        
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+    <div class="controls">
+        <h3>Scalebar Configuration</h3>
+        
+        <div class="control-group">
+            <label for="units">Units:</label>
+            <select id="units">
+                <option value="metric">Metric</option>
+                <option value="imperial">Imperial</option>
+                <option value="both">Both</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label for="style">Style:</label>
+            <select id="style">
+                <option value="line">Line</option>
+                <option value="checkered">Checkered</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label for="maxWidth">Max Width (px):</label>
+            <input type="range" id="maxWidth" min="50" max="300" value="150">
+            <span id="maxWidthValue">150</span>
+        </div>
+        
+        <div class="color-controls">
+            <div class="control-group">
+                <label for="textColor">Text Color:</label>
+                <input type="color" id="textColor" value="#000000">
+            </div>
+            <div class="control-group">
+                <label for="strokeColor">Line Color:</label>
+                <input type="color" id="strokeColor" value="#000000">
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <label for="backgroundColor">Background:</label>
+            <input type="color" id="backgroundColor" value="#ffffff">
+        </div>
+        
+        <div class="control-group">
+            <label for="transparency">Transparency:</label>
+            <input type="range" id="transparency" min="0" max="1" step="0.1" value="0.8">
+            <span id="transparencyValue">0.8</span>
+        </div>
+        
+        <div class="control-group">
+            <label for="fontSize">Font Size:</label>
+            <input type="range" id="fontSize" min="8" max="20" value="12">
+            <span id="fontSizeValue">12</span>
+        </div>
+        
+        <div class="control-group">
+            <label for="strokeWidth">Line Width:</label>
+            <input type="range" id="strokeWidth" min="1" max="5" value="2">
+            <span id="strokeWidthValue">2</span>
+        </div>
+        
+        <div class="control-group">
+            <label for="showFrame">Show Frame:</label>
+            <input type="checkbox" id="showFrame" checked>
+        </div>
+        
+        <div id="checkeredControls" style="display: none;">
+            <div class="control-group">
+                <label for="checkeredHeight">Bar Height:</label>
+                <input type="range" id="checkeredHeight" min="6" max="20" value="8">
+                <span id="checkeredHeightValue">8</span>
+            </div>
+            
+            <div class="control-group">
+                <label for="checkeredSegments">Segments:</label>
+                <input type="range" id="checkeredSegments" min="2" max="10" value="4">
+                <span id="checkeredSegmentsValue">4</span>
+            </div>
+            
+            <div class="color-controls">
+                <div class="control-group">
+                    <label for="checkeredColor1">Color 1:</label>
+                    <input type="color" id="checkeredColor1" value="#ffffff">
+                </div>
+                <div class="control-group">
+                    <label for="checkeredColor2">Color 2:</label>
+                    <input type="color" id="checkeredColor2" value="#000000">
+                </div>
+            </div>
+        </div>
+        
+        <div class="color-controls">
+            <div class="control-group">
+                <label for="frameColor">Frame Color:</label>
+                <input type="color" id="frameColor" value="#000000">
+            </div>
+            <div class="control-group">
+                <label for="frameWidth">Frame Width:</label>
+                <input type="range" id="frameWidth" min="1" max="5" value="1">
+                <span id="frameWidthValue">1</span>
+            </div>
+        </div>
+        
+        <div class="preset-buttons">
+            <h3 style="width: 100%;">Presets:</h3>
+            <button onclick="applyPreset('dark')">Dark Theme</button>
+            <button onclick="applyPreset('minimal')">Minimal</button>
+            <button onclick="applyPreset('colorful')">Colorful</button>
+            <button onclick="applyPreset('classic')">Classic</button>
+            <button onclick="applyPreset('checkered')">Checkered</button>
+        </div>
+    </div>
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js'></script>
+    <script src="src/mapbox-scalebar.js"></script>
+    <script>
+        // Replace 'YOUR_MAPBOX_ACCESS_TOKEN' with your actual Mapbox access token
+        mapboxgl.accessToken = 'pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJjbGV4YW1wbGUifQ.example_token_replace_with_your_own';
+        
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v12',
+            center: [-74.006, 40.7128], // New York City
+            zoom: 12
+        });
+
+        // Create the scalebar with initial options
+        const scalebar = new MapboxScalebar({
+            units: 'metric',
+            maxWidth: 150,
+            textColor: '#000000',
+            strokeColor: '#000000',
+            backgroundColor: '#ffffff',
+            transparency: 0.8,
+            fontSize: 12,
+            strokeWidth: 2,
+            showFrame: true,
+            frameColor: '#000000',
+            frameWidth: 1,
+            style: 'line',
+            checkeredHeight: 8,
+            checkeredSegments: 4,
+            checkeredColor1: '#ffffff',
+            checkeredColor2: '#000000'
+        });
+
+        // Add the scalebar to the map
+        map.addControl(scalebar, 'bottom-left');
+
+        // Update functions for range inputs
+        function updateRangeValue(inputId, displayId) {
+            const input = document.getElementById(inputId);
+            const display = document.getElementById(displayId);
+            display.textContent = input.value;
+        }
+
+        // Set up event listeners for all controls
+        document.getElementById('units').addEventListener('change', updateScalebar);
+        document.getElementById('style').addEventListener('change', function() {
+            toggleCheckeredControls();
+            updateScalebar();
+        });
+        document.getElementById('maxWidth').addEventListener('input', function() {
+            updateRangeValue('maxWidth', 'maxWidthValue');
+            updateScalebar();
+        });
+        document.getElementById('textColor').addEventListener('change', updateScalebar);
+        document.getElementById('strokeColor').addEventListener('change', updateScalebar);
+        document.getElementById('backgroundColor').addEventListener('change', updateScalebar);
+        document.getElementById('transparency').addEventListener('input', function() {
+            updateRangeValue('transparency', 'transparencyValue');
+            updateScalebar();
+        });
+        document.getElementById('fontSize').addEventListener('input', function() {
+            updateRangeValue('fontSize', 'fontSizeValue');
+            updateScalebar();
+        });
+        document.getElementById('strokeWidth').addEventListener('input', function() {
+            updateRangeValue('strokeWidth', 'strokeWidthValue');
+            updateScalebar();
+        });
+        document.getElementById('showFrame').addEventListener('change', updateScalebar);
+        document.getElementById('frameColor').addEventListener('change', updateScalebar);
+        document.getElementById('frameWidth').addEventListener('input', function() {
+            updateRangeValue('frameWidth', 'frameWidthValue');
+            updateScalebar();
+        });
+        document.getElementById('checkeredHeight').addEventListener('input', function() {
+            updateRangeValue('checkeredHeight', 'checkeredHeightValue');
+            updateScalebar();
+        });
+        document.getElementById('checkeredSegments').addEventListener('input', function() {
+            updateRangeValue('checkeredSegments', 'checkeredSegmentsValue');
+            updateScalebar();
+        });
+        document.getElementById('checkeredColor1').addEventListener('change', updateScalebar);
+        document.getElementById('checkeredColor2').addEventListener('change', updateScalebar);
+
+        function toggleCheckeredControls() {
+            const style = document.getElementById('style').value;
+            const checkeredControls = document.getElementById('checkeredControls');
+            checkeredControls.style.display = style === 'checkered' ? 'block' : 'none';
+        }
+        
+        function updateScalebar() {
+            const options = {
+                units: document.getElementById('units').value,
+                maxWidth: parseInt(document.getElementById('maxWidth').value),
+                textColor: document.getElementById('textColor').value,
+                strokeColor: document.getElementById('strokeColor').value,
+                backgroundColor: document.getElementById('backgroundColor').value,
+                transparency: parseFloat(document.getElementById('transparency').value),
+                fontSize: parseInt(document.getElementById('fontSize').value),
+                strokeWidth: parseInt(document.getElementById('strokeWidth').value),
+                showFrame: document.getElementById('showFrame').checked,
+                frameColor: document.getElementById('frameColor').value,
+                frameWidth: parseInt(document.getElementById('frameWidth').value),
+                style: document.getElementById('style').value,
+                checkeredHeight: parseInt(document.getElementById('checkeredHeight').value),
+                checkeredSegments: parseInt(document.getElementById('checkeredSegments').value),
+                checkeredColor1: document.getElementById('checkeredColor1').value,
+                checkeredColor2: document.getElementById('checkeredColor2').value
+            };
+            
+            scalebar.setOptions(options);
+        }
+
+        function applyPreset(preset) {
+            let options = {};
+            
+            switch(preset) {
+                case 'dark':
+                    options = {
+                        textColor: '#ffffff',
+                        strokeColor: '#ffffff',
+                        backgroundColor: '#000000',
+                        frameColor: '#ffffff',
+                        transparency: 0.9
+                    };
+                    break;
+                case 'minimal':
+                    options = {
+                        textColor: '#666666',
+                        strokeColor: '#666666',
+                        backgroundColor: '#ffffff',
+                        frameColor: '#cccccc',
+                        transparency: 0.5,
+                        showFrame: false,
+                        strokeWidth: 1,
+                        fontSize: 10
+                    };
+                    break;
+                case 'colorful':
+                    options = {
+                        textColor: '#2c3e50',
+                        strokeColor: '#e74c3c',
+                        backgroundColor: '#f39c12',
+                        frameColor: '#9b59b6',
+                        transparency: 0.8,
+                        strokeWidth: 3,
+                        frameWidth: 2
+                    };
+                    break;
+                case 'classic':
+                    options = {
+                        textColor: '#000000',
+                        strokeColor: '#000000',
+                        backgroundColor: '#ffffff',
+                        frameColor: '#000000',
+                        transparency: 0.8,
+                        strokeWidth: 2,
+                        fontSize: 12,
+                        showFrame: true,
+                        style: 'line'
+                    };
+                    break;
+                case 'checkered':
+                    options = {
+                        textColor: '#000000',
+                        strokeColor: '#000000',
+                        backgroundColor: '#ffffff',
+                        frameColor: '#000000',
+                        transparency: 0.9,
+                        strokeWidth: 1,
+                        fontSize: 12,
+                        showFrame: true,
+                        style: 'checkered',
+                        checkeredHeight: 10,
+                        checkeredSegments: 5,
+                        checkeredColor1: '#ffffff',
+                        checkeredColor2: '#000000'
+                    };
+                    break;
+            }
+            
+            // Update UI controls
+            Object.keys(options).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    if (element.type === 'checkbox') {
+                        element.checked = options[key];
+                    } else if (element.type === 'range') {
+                        element.value = options[key];
+                        const displayElement = document.getElementById(key + 'Value');
+                        if (displayElement) {
+                            displayElement.textContent = options[key];
+                        }
+                    } else {
+                        element.value = options[key];
+                    }
+                }
+            });
+            
+            toggleCheckeredControls();
+            scalebar.setOptions(options);
+        }
+
+        // Initialize range value displays
+        updateRangeValue('maxWidth', 'maxWidthValue');
+        updateRangeValue('transparency', 'transparencyValue');
+        updateRangeValue('fontSize', 'fontSizeValue');
+        updateRangeValue('strokeWidth', 'strokeWidthValue');
+        updateRangeValue('frameWidth', 'frameWidthValue');
+        updateRangeValue('checkeredHeight', 'checkeredHeightValue');
+        updateRangeValue('checkeredSegments', 'checkeredSegmentsValue');
+        
+        // Initialize checkered controls visibility
+        toggleCheckeredControls();
+
+        // Add some sample locations to test at different latitudes
+        const locations = [
+            { name: 'New York', center: [-74.006, 40.7128], zoom: 12 },
+            { name: 'London', center: [-0.1276, 51.5074], zoom: 12 },
+            { name: 'Sydney', center: [151.2093, -33.8688], zoom: 12 },
+            { name: 'Reykjavik', center: [-21.8174, 64.1466], zoom: 12 },
+            { name: 'Singapore', center: [103.8198, 1.3521], zoom: 12 }
+        ];
+
+        // Add location buttons
+        const controlsDiv = document.querySelector('.controls');
+        const locationButtons = document.createElement('div');
+        locationButtons.innerHTML = '<h3>Test Locations:</h3>';
+        locationButtons.className = 'preset-buttons';
+
+        locations.forEach(location => {
+            const button = document.createElement('button');
+            button.textContent = location.name;
+            button.onclick = () => {
+                map.flyTo({
+                    center: location.center,
+                    zoom: location.zoom,
+                    duration: 1000
+                });
+            };
+            locationButtons.appendChild(button);
+        });
+
+        controlsDiv.appendChild(locationButtons);
+        
+        // Handle missing Mapbox token
+        map.on('error', function(e) {
+            if (e.error && e.error.message && e.error.message.includes('401')) {
+                alert('Please replace the Mapbox access token in the HTML file with your own token from https://account.mapbox.com/');
+            }
+        });
+    </script>
+</body>
+</html>
