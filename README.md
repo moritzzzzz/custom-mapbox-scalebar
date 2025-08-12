@@ -11,6 +11,9 @@ A highly customizable scalebar plugin for Mapbox GL JS that adapts to different 
 - **Responsive**: Updates in real-time as users pan and zoom the map
 - **Lightweight**: No external dependencies beyond Mapbox GL JS
 
+  <img width="1073" height="902" alt="image" src="https://github.com/user-attachments/assets/09d55c07-3d5b-4fc1-8e71-19f74e5198db" />
+
+
 ## Installation
 
 ### Option 1: Direct Include
