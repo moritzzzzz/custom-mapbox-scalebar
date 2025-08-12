@@ -1,4 +1,4 @@
-# Mapbox Scalebar Plugin
+# Customizable Mapbox Scalebar Plugin
 
 A highly customizable scalebar plugin for Mapbox GL JS that adapts to different zoom levels and latitudes.
 
